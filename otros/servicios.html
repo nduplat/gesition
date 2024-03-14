@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crear Servicios</title>
+  <!-- Agrega los scripts de Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+</head>
+<body>
+
+<script>
+  // Configuración de Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyAEmat0f_qXGoCiEyL6rWibRhoSc4TZ_FY",
+    authDomain: "nico-b912d.firebaseapp.com",
+    projectId: "nico-b912d",
+    storageBucket: "nico-b912d.appspot.com",
+    messagingSenderId: "668448147166",
+    appId: "1:668448147166:web:c1bdf203c7271080bca44f",
+    measurementId: "G-RQ5K4CDC3Z"
+  };
+
+  // Inicializa Firebase
+  firebase.initializeApp(firebaseConfig);
+
+  const database = firebase.database();
+
+  const cilindrajes = [
+    { value: "todos", range: "Todos los cilindrajes" },
+    { value: "0-100", range: "Menos de 100cc" },
+    { value: "101-250", range: "100cc - 250cc" },
+    { value: "251-500", range: "251cc - 500cc" },
+    { value: "501-750", range: "501cc - 750cc" },
+    { value: "751-1000", range: "751cc - 1000cc" },
+    { value: "1001-mas", range: "Más de 1000cc" }
+  ];
+
+  const serviciosPorCilindraje = {
+    "todos": [
+      { descripcion: "Revisión General", precio: "60000" },
+      { descripcion: "Cambio de Bujías", precio: "70000" },
+      { descripcion: "Alineación de Dirección", precio: "80000" }
+    ],
+    "0-100": [
+      { descripcion: "Cambio de Aceite", precio: "40000" },
+      { descripcion: "Limpieza de Filtro de Aire", precio: "30000" },
+      { descripcion: "Revisión de Batería", precio: "25000" }
+    ],
+    "101-250": [
+      { descripcion: "Cambio de Frenos", precio: "60000" },
+      { descripcion: "Lubricación de Cadena", precio: "50000" },
+      { descripcion: "Cambio de Filtro de Aceite", precio: "35000" }
+    ],
+    "251-500": [
+      { descripcion: "Revisión de Suspensión", precio: "70000" },
+      { descripcion: "Ajuste de Carburador", precio: "55000" },
+      { descripcion: "Cambio de Batería", precio: "45000" }
+    ],
+    "501-750": [
+      { descripcion: "Cambio de Líquido de Frenos", precio: "80000" },
+      { descripcion: "Ajuste de Válvulas", precio: "65000" },
+      { descripcion: "Limpieza de Inyectores", precio: "60000" }
+    ],
+    "751-1000": [
+      { descripcion: "Cambio de Pastillas de Freno", precio: "90000" },
+      { descripcion: "Revisión de Embrague", precio: "75000" },
+      { descripcion: "Reemplazo de Bomba de Agua", precio: "70000" }
+    ],
+    "1001-mas": [
+      { descripcion: "Reparación de Motor", precio: "150000" },
+      { descripcion: "Cambio de Radiador", precio: "120000" },
+      { descripcion: "Revisión de Transmisión", precio: "100000" }
+    ]
+  };
+
+  async function crearServicios() {
+    for (const cilindraje of cilindrajes) {
+      const servicios = serviciosPorCilindraje[cilindraje.value];
+      for (const servicio of servicios) {
+        const servicioRef = database.ref("servicios").push();
+        await servicioRef.set({
+          cilindraje: cilindraje.value,
+          descripcion: servicio.descripcion,
+          precio: servicio.precio,
+          id: servicioRef.key
+        });
+        console.log(`Servicio creado para ${cilindraje.range}: ${servicio.descripcion}`);
+      }
+    }
+    console.log("Todos los servicios han sido creados.");
+  }
+
+  // Llama a la función para crear servicios cuando se cargue la página
+  window.onload = function() {
+    crearServicios();
+  };
+</script>
+
+</body>
+</html>

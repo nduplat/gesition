@@ -1,0 +1,39 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f0f0f0;
+  }
+  
+  .hexagram {
+    position: relative;
+    width: 200px;
+    height: 346.41px; /* Altura necesaria para que la figura esté completamente visible */
+    background-color: transparent;
+  }
+  
+  .hexagram:before,
+  .hexagram:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-left: 100px solid transparent;
+    border-right: 100px solid transparent;
+    border-bottom: 173.21px solid dodgerblue; /* Altura del triángulo equilátero = (lado/2) * √3 */
+    transform: translateX(-50%);
+  }
+  
+  .hexagram:before {
+    transform-origin: 50% 173.21px; /* Ajuste para el primer triángulo */
+  }
+  
+  .hexagram:after {
+    transform-origin: 50% calc(346.41px - 173.21px); /* Ajuste para el segundo triángulo */
+    transform: translateX(-50%) rotate(180deg); /* Rotamos el segundo triángulo 180 grados */
+  }
+  

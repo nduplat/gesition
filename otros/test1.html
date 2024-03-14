@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servicios Realizados</title>
+    <link rel="stylesheet" type="text/css" href="styles/serviciosRealizados.css">
+    
+    <!-- Agrega los scripts de Firebase y la configuración -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="firebaseConfig.js"></script>
+    <style>
+    /* Estilos para la barra de navegación */
+    .navbar {
+        font-family: "Arial", sans-serif;
+        background-color: dodgerblue;
+        color: white;
+        padding: 10px 20px;
+        width: 100%;
+        position: fixed;
+        top: 0;
+        z-index: 1000;
+    }
+
+    .navbar a {
+        font-size: 24px;
+        font-weight: bold;
+        color: white;
+        text-decoration: none;
+        padding-left: 30px;
+    }
+
+    .navbar a:hover {
+        background-color: #f65904;
+    }
+</style>
+</head>
+<body>
+    <!-- Barra de navegación -->
+    <div class="navbar">
+        <a href="index.html">Inicio</a>
+    </div>
+    <div class="container">
+        <h1>Asigna servicios a un vehículo</h1>
+
+        <form id="consultaForm">
+            <label for="email">Ingrese su correo electrónico:</label>
+            <input type="email" id="email" name="email" required>
+            <button type="button" onclick="buscarVehiculos()">Buscar</button>
+            <br>
+            <label for="placa">Ingrese la placa del vehículo:</label>
+            <input type="text" id="placa" name="placa" required>
+            <button type="button" onclick="buscarVehiculosPorPlaca()">Buscar por Placa</button>
+        </form>
+
+        <div id="vehiculosContainer"></div>
+    </div>
+
+    <script>
+        // Función para buscar vehículos asociados al usuario por correo electrónico
+        function buscarVehiculos() {
+            const emailInput = document.getElementById('email');
+            const consultaForm = document.getElementById('consultaForm');
+            const email = emailInput.value;
+            const usuarios = firebase.database().ref('usuarios');
+
+            // Realizar consulta por correo electrónico
+            usuarios.orderByChild('email').equalTo(email).once('value', function(snapshot) {
+                if (snapshot.exists()) {
+                    // El usuario con el correo electrónico proporcionado existe
+                    const usuarioId = Object.keys(snapshot.val())[0];
+                    const vehiculos = firebase.database().ref('vehiculos').orderByChild('idUsuario').equalTo(usuarioId);
+
+                    // Mostrar los vehículos asociados al usuario
+                    vehiculos.once('value', function(snapshot) {
+                        const vehiculosContainer = document.getElementById('vehiculosContainer');
+                        vehiculosContainer.innerHTML = ''; // Limpiar contenido anterior
+
+                        if (snapshot.exists()) {
+                            // Mostrar los vehículos
+                            snapshot.forEach(function(childSnapshot) {
+                                const vehiculoData = childSnapshot.val();
+                                const vehiculoId = childSnapshot.key;
+                                const vehiculoInfo = `
+                                    <div class="vehiculo">
+                                        <p><strong>ID del vehículo:</strong> ${vehiculoId}</p>
+                                        <p><strong>Placa:</strong> ${vehiculoData.placa}</p>
+                                        <p><strong>Modelo:</strong> ${vehiculoData.modeloMoto}</p>
+                                        <p><strong>Kilometraje actual:</strong> ${vehiculoData.kilometrajeActual}</p>
+                                        <p><strong>Cilindraje:</strong> ${vehiculoData.cilindraje}</p>
+                                        <div class="servicios">
+                                            <select id="servicios-${vehiculoId}" class="servicios"></select>
+                                            <button type="button" data-vehiculo-id="${vehiculoId}" onclick="mostrarServicios('${vehiculoId}', '${vehiculoData.cilindraje}')">Mostrar Servicios</button>
+                                        </div>
+                                        <div id="serviciosAsignados-${vehiculoId}" class="servicios-asignados"></div>
+                                    </div>
+                                    <hr>
+                                `;
+                                vehiculosContainer.innerHTML += vehiculoInfo;
+                            });
+
+                            // Bloquear el campo de correo electrónico
+                            emailInput.disabled = true;
+                            // Ocultar el formulario de consulta
+                            consultaForm.style.display = 'none';
+                        } else {
+                            // No se encontraron vehículos asociados al usuario
+                            vehiculosContainer.innerHTML = '<p>No se encontraron vehículos asociados a este usuario.</p>';
+                        }
+                    });
+                } else {
+                    // El usuario con el correo electrónico proporcionado no existe
+                    alert('El correo electrónico ingresado no existe.');
+                }
+            });
+        }
+
+        // Función para buscar vehículos por placa
+        function buscarVehiculosPorPlaca() {
+            const placaInput = document.getElementById('placa');
+            const consultaForm = document.getElementById('consultaForm');
+            const placa = placaInput.value;
+            const vehiculos = firebase.database().ref('vehiculos');
+
+            // Realizar consulta por placa
+            vehiculos.orderByChild('placa').equalTo(placa).once('value', function(snapshot) {
+                if (snapshot.exists()) {
+                    // Se encontró el vehículo con la placa proporcionada
+                    // Mostrar los detalles del vehículo
+                    const vehiculosContainer = document.getElementById('vehiculosContainer');
+                    vehiculosContainer.innerHTML = ''; // Limpiar contenido anterior
+
+                    snapshot.forEach(function(childSnapshot) {
+                        const vehiculoData = childSnapshot.val();
+                        const vehiculoId = childSnapshot.key;
+                        const vehiculoInfo = `
+                            <div class="vehiculo">
+                                <p><strong>ID del vehículo:</strong> ${vehiculoId}</p>
+                                <p><strong>Placa:</strong> ${vehiculoData.placa}</p>
+                                <p><strong>Modelo:</strong> ${vehiculoData.modeloMoto}</p>
+                                <p><strong>Kilometraje actual:</strong> ${vehiculoData.kilometrajeActual}</p>
+                                <p><strong>Cilindraje:</strong> ${vehiculoData.cilindraje}</p>
+                                <div class="servicios">
+                                    <select id="servicios-${vehiculoId}" class="servicios"></select>
+                                    <button type="button" data-vehiculo-id="${vehiculoId}" onclick="mostrarServicios('${vehiculoId}', '${vehiculoData.cilindraje}')">Mostrar Servicios</button>
+                                </div>
+                                <div id="serviciosAsignados-${vehiculoId}" class="servicios-asignados"></div>
+                            </div>
+                            <hr>
+                        `;
+                        vehiculosContainer.innerHTML += vehiculoInfo;
+                    });
+
+                    // Bloquear el campo de placa
+                    placaInput.disabled = true;
+                    // Ocultar el formulario de consulta
+                    consultaForm.style.display = 'none';
+                } else {
+                    // No se encontró ningún vehículo con la placa proporcionada
+                    alert('No se encontró ningún vehículo con la placa proporcionada.');
+                }
+            });
+        }
+
+        
+        // Función para mostrar los servicios disponibles para agregar al vehículo
+        function mostrarServicios(vehiculoId, cilindraje) {
+            const serviciosContainer = document.getElementById(`servicios-${vehiculoId}`);
+            const mostrarServiciosButton = document.querySelector(`button[data-vehiculo-id="${vehiculoId}"]`);
+            const asignarButton = document.createElement('button'); // Creamos el botón "Asignar"
+            const guardarButton = document.createElement('button'); // Creamos el botón "Guardar Servicios Realizados"
+            
+            // Ocultar el botón "Mostrar Servicios"
+            mostrarServiciosButton.style.display = 'none';
+            
+            // Mostrar el desplegable
+            serviciosContainer.style.display = 'block';
+
+            // Limpiar contenido anterior
+            serviciosContainer.innerHTML = '';
+
+            // Obtener los servicios disponibles para el cilindraje de ese vehículo y para "todos"
+            const serviciosRef = firebase.database().ref('servicios');
+            serviciosRef.once('value', function(snapshot) {
+                if (snapshot.exists()) {
+                    // Mostrar los servicios
+                    snapshot.forEach(function(childSnapshot) {
+                        const servicioData = childSnapshot.val();
+                        // Verificar si el servicio es aplicable al cilindraje del vehículo o es para "todos"
+                        if (servicioData.cilindraje === cilindraje || servicioData.cilindraje === 'todos') {
+                            const servicioOption = document.createElement('option');
+                            servicioOption.value = childSnapshot.key;
+                            servicioOption.textContent = `${servicioData.descripcion} - Precio: ${servicioData.precio}`;
+                            serviciosContainer.appendChild(servicioOption);
+                        }
+                    });
+
+                    // Agregar botón "Asignar"
+                    asignarButton.textContent = 'Asignar';
+                    asignarButton.addEventListener('click', function() {
+                        agregarServicio(vehiculoId, cilindraje);
+                    });
+                    serviciosContainer.parentNode.insertBefore(asignarButton, serviciosContainer.nextSibling);
+
+                    // Agregar botón "Guardar Servicios Realizados"
+                    guardarButton.textContent = 'Guardar Servicios Realizados';
+                    guardarButton.addEventListener('click', function() {
+                        guardarServiciosRealizados(vehiculoId);
+                    });
+                    serviciosContainer.parentNode.appendChild(guardarButton);
+                } else {
+                    // No se encontraron servicios disponibles
+                    const servicioOption = document.createElement('option');
+                    servicioOption.value = '';
+                    servicioOption.textContent = 'No se encontraron servicios disponibles.';
+                    servicioOption.disabled = true;
+                    serviciosContainer.appendChild(servicioOption);
+                }
+            });
+        }
+
+        // Función para agregar un servicio para un vehículo específico
+        function agregarServicio(vehiculoId, cilindraje) {
+            const serviciosAsignadosContainer = document.getElementById(`serviciosAsignados-${vehiculoId}`);
+            const servicioSelect = document.getElementById(`servicios-${vehiculoId}`);
+            const servicioId = servicioSelect.value;
+            const servicioDescripcion = servicioSelect.options[servicioSelect.selectedIndex].text;
+
+            // Agregar el servicio seleccionado al contenedor de servicios asignados
+            const servicioAsignado = document.createElement('p');
+            servicioAsignado.textContent = servicioDescripcion;
+            serviciosAsignadosContainer.appendChild(servicioAsignado);
+        }
+
+        // Función para guardar los servicios realizados
+        function guardarServiciosRealizados(vehiculoId) {
+            const serviciosAsignadosContainer = document.getElementById(`serviciosAsignados-${vehiculoId}`);
+            const serviciosRealizados = serviciosAsignadosContainer.innerHTML;
+
+            // Obtener la fecha y hora actual
+            const now = new Date();
+            const fecha = now.toISOString().split('T')[0];
+            const hora = now.toTimeString().split(' ')[0];
+
+            // Obtener el id del usuario
+            const email = document.getElementById('email').value;
+            const usuariosRef = firebase.database().ref('usuarios');
+            usuariosRef.orderByChild('email').equalTo(email).once('value', function(snapshot) {
+                if (snapshot.exists()) {
+                    const usuarioId = Object.keys(snapshot.val())[0];
+
+                    // Guardar los servicios realizados en la base de datos
+                    const serviciosRealizadosRef = firebase.database().ref('serviciosRealizados');
+                    const nuevoServicioRealizadoRef = serviciosRealizadosRef.push();
+                    nuevoServicioRealizadoRef.set({
+                        idVehiculo: vehiculoId,
+                        idUsuario: usuarioId,
+                        fecha: fecha,
+                        hora: hora,
+                        serviciosAsignados: serviciosRealizados
+                    });
+
+                    // Confirmación de guardado
+                    alert('Servicios realizados guardados exitosamente.');
+                } else {
+                    // El usuario no existe
+                    alert('Error: El usuario no existe.');
+                }
+            });
+        }
+        </script>
+</body>
+</html>

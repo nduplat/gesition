@@ -1,0 +1,21 @@
+.star {
+    position: relative;
+    display: block;
+    width: 0;
+    height: 0;
+    border-right: 100px solid transparent;
+    border-left: 100px solid transparent;
+    border-bottom: 160px solid dodgerblue; /* Color dodgerblue */
+  }
+  
+  .star:after {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 56px; /* Mover hacia arriba para superponerlo sobre el triángulo anterior */
+    right: -100px;    
+    border-right: 100px solid transparent;
+    border-left: 100px solid transparent;
+    border-top: 160px solid dodgerblue; /* Color dodgerblue */
+  }
+  

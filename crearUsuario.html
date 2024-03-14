@@ -1,0 +1,223 @@
+  <!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Formulario de Creación de Usuarios</title>
+  <link rel="stylesheet" type="text/css" href="styles/styles.css">
+  <style>
+  /* Estilos para la barra de navegación */
+  .navbar {
+      font-family: "Arial", sans-serif;
+      background-color: dodgerblue;
+      color: white;
+      padding: 10px 20px;
+      width: 100%;
+      position: fixed;
+      top: 0;
+      z-index: 1000;
+  }
+
+  .navbar a {
+      font-size: 24px;
+      font-weight: bold;
+      color: white;
+      text-decoration: none;
+      padding-left: 30px;
+  }
+
+  .navbar a:hover {
+      background-color: #f65904;
+  }
+</style>
+</head>
+<body>
+    <!-- Barra de navegación -->
+<div class="navbar">
+    <a href="index.html">Inicio</a>
+</div>
+  <h2>Crear Usuario</h2>
+  <form id="registroFormParte1">
+    <label for="userId">ID Usuario:</label>
+    <input type="text" id="userId" name="idUsuario" disabled>
+
+    <label for="email">Correo Electrónico:</label>
+    <input type="email" id="email" name="email" required>
+
+    <label for="fname">Nombre:</label>
+    <input type="text" id="fname" name="nombre">
+
+    <label for="lname">Apellido:</label>
+    <input type="text" id="lname" name="apellido">
+
+    <label for="dob">Fecha de Nacimiento:</label>
+    <input type="date" id="dob" name="fechaNacimiento">
+
+    <label for="phone">Celular:</label>
+    <input type="tel" id="phone" name="celular" pattern="[3][0-9]{9}" title="El número de celular debe comenzar con 3 y tener 10 dígitos" required>
+
+    <div class="buttons">
+      <button type="submit">Crear Usuario</button>
+    </div>
+  </form>
+
+  <h2>Asignar vehículo</h2>
+  <form id="registroFormParte2" style="display:none;">
+    <label for="vehicleId">ID Vehículo:</label>
+    <input type="text" id="vehicleId" name="idVehiculo" disabled>
+
+    <label for="plate">Placa:</label>
+    <input type="text" id="plate" name="placa">
+
+    <label for="cc">Cilindraje (cc):</label>
+    <select id="cc" name="cilindraje">
+      <option value="">Selecciona el cilindraje</option>
+      <option value="0-100">Menos de 100cc</option>
+      <option value="101-250">100cc - 250cc</option>
+      <option value="251-500">251cc - 500cc</option>
+      <option value="501-750">501cc - 750cc</option>
+      <option value="751-1000">751cc - 1000cc</option>
+      <option value="1001-mas">Más de 1000cc</option>
+    </select>
+
+    <label for="moto">Modelo de Moto:</label>
+    <select id="moto" name="modeloMoto">
+      <option value="">Selecciona un año</option>
+    </select>
+
+    <label for="km">Kilometraje Actual:</label>
+    <input type="number" id="km" name="kilometrajeActual" min="0" max="999999">
+
+    <div class="buttons">
+      <button type="button" onclick="asignarVehiculo()">Asignar</button>
+      <button type="button" onclick="location.href='index.html'">Salir</button>
+
+    </div>
+  </form>
+
+  <button id="crearNuevoUsuario" style="display:none;" onclick="location.reload()">Crear Nuevo Usuario</button>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <script>
+    // Initialize Firebase
+    const firebaseConfig = {
+    apiKey: "AIzaSyAEmat0f_qXGoCiEyL6rWibRhoSc4TZ_FY",
+    authDomain: "nico-b912d.firebaseapp.com",
+    projectId: "nico-b912d",
+    storageBucket: "nico-b912d.appspot.com",
+    messagingSenderId: "668448147166",
+    appId: "1:668448147166:web:c1bdf203c7271080bca44f",
+    measurementId: "G-RQ5K4CDC3Z"
+    };
+
+    // Inicializa Firebase
+    firebase.initializeApp(firebaseConfig);
+
+    // Variables globales para almacenar datos del usuario
+    let userId;
+    let userData = {};
+
+    // Guardar datos en Firebase Realtime Database - Parte 1
+    const formParte1 = document.getElementById('registroFormParte1');
+    formParte1.addEventListener('submit', (e) => {
+      e.preventDefault();
+      userData.idUsuario = formParte1.userId.value;
+      userData.email = formParte1.email.value;
+      userData.nombre = formParte1.fname.value;
+      userData.apellido = formParte1.lname.value;
+      userData.fechaNacimiento = formParte1.dob.value;
+      userData.celular = formParte1.phone.value;
+
+      // Verificar si el correo electrónico ya existe
+      const ref = firebase.database().ref('usuarios');
+      ref.orderByChild('email').equalTo(userData.email).once('value', snapshot => {
+        if (snapshot.exists()) {
+          alert('El correo electrónico ya está registrado.');
+        } else {
+          // Guardar datos del usuario en Firebase solo si el correo no existe
+          ref.push(userData).then((snapshot) => {
+            userId = snapshot.key; // Almacena el ID único del usuario
+            console.log('ID único asignado al nuevo usuario:', userId);
+            // Completar el campo "ID Usuario" con el ID asignado por Firebase
+            formParte1.userId.value = userId;
+            // Dejar el correo en el campo correspondiente
+            formParte1.email.value = userData.email;
+            alert('¡Datos del usuario guardados correctamente!');
+            // Mostrar la parte 2 del formulario si los datos del usuario se guardan correctamente
+            document.getElementById('registroFormParte2').style.display = 'block';
+            // Bloquear campos del usuario
+            const inputsUsuario = formParte1.querySelectorAll('input');
+            inputsUsuario.forEach(input => {
+              input.disabled = true;
+            });
+            // Mostrar el botón "Crear Nuevo Usuario"
+            document.getElementById('crearNuevoUsuario').style.display = 'inline-block';
+          }).catch((error) => {
+            console.error('Error al guardar los datos del usuario: ', error);
+          });
+        }
+      });
+    });
+
+    // Función para asignar vehículo al usuario
+    function asignarVehiculo() {
+      const formParte2 = document.getElementById('registroFormParte2');
+      const idUsuario = document.getElementById('userId').value;
+      const placa = formParte2.plate.value;
+      const cilindraje = formParte2.cc.value; // Obtener el cilindraje seleccionado
+
+      if (cilindraje === '') {
+        alert('Por favor selecciona un cilindraje.'); // Validar que se haya seleccionado un cilindraje
+        return;
+      }
+
+      // Realiza una consulta a la base de datos para verificar si la placa ya está registrada
+      const refPlacas = firebase.database().ref('vehiculos');
+      refPlacas.orderByChild('placa').equalTo(placa).once('value', snapshot => {
+        if (snapshot.exists()) {
+          alert('La placa ya está registrada.');
+        } else {
+          // La placa no está registrada, asigna la placa al usuario y guarda la información en la base de datos
+          const idVehiculo = formParte2.vehicleId.value;
+          const modeloMoto = formParte2.moto.value;
+          const kilometrajeActual = formParte2.km.value;
+
+          // Guarda los datos del vehículo en la base de datos
+          const refVehiculos = firebase.database().ref('vehiculos');
+          const vehiculoData = {
+            idVehiculo: idVehiculo,
+            placa: placa,
+            cilindraje: cilindraje, // Asigna el cilindraje seleccionado
+            modeloMoto: modeloMoto,
+            kilometrajeActual: kilometrajeActual,
+            idUsuario: idUsuario  // Asigna el ID del usuario al vehículo
+          };
+          refVehiculos.push(vehiculoData).then(() => {
+            alert('Vehículo asignado correctamente.');
+            formParte2.reset();
+          }).catch((error) => {
+            console.error('Error al guardar los datos del vehículo: ', error);
+          });
+        }
+      });
+    }
+
+    // Llenar el select con los años cuando el DOM esté completamente cargado
+    document.addEventListener("DOMContentLoaded", function() {
+      fillYearSelect();
+    });
+
+    // Función para llenar el select con los años desde 1900 hasta el año actual
+    function fillYearSelect() {
+      var select = document.getElementById("moto");
+      var currentYear = new Date().getFullYear();
+      for (var year = 1900; year <= currentYear; year++) {
+        var option = document.createElement("option");
+        option.value = year;
+        option.textContent = year;
+        select.appendChild(option);
+      }
+    }
+  </script>
+</body>
+</html>

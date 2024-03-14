@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="styles/dbstyle.css">
+  <script src="gestion.js"></script>
+  <style>
+    /* Estilos CSS adicionales */
+    .submenu {
+      display: none;
+      list-style-type: none;
+      padding-left: 20px;
+    }
+
+    .submenu li {
+      margin-bottom: 5px;
+    }
+
+    .submenu li a {
+      text-decoration: none;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <!-- Barra lateral -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <h3>Menú</h3>
+      </div>
+      <ul class="menu">
+        <li><a href="#" onclick="showSubMenu('gestionesSubMenu')">Gestiones</a>
+          <ul class="submenu" id="gestionesSubMenu">
+            <li><a href="file:///D:/raiz/index.html">Crear usuario y asignar vehículo</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#" onclick="showSubMenu('serviciosSubMenu')">Servicios Realizados</a>
+          <ul class="submenu" id="serviciosSubMenu">
+            <li><a href="file:///D:/raiz/consultaServiciosRealizados.html">Consultar Servicios Realizados</a></li>
+            <li><a href="file:///D:/raiz/serviciosRealizados.html">Asignar Servicios a Vehículo</a></li>
+          </ul>
+        </li>
+        <li><a href="#">Notificaciones</a></li>
+        <!-- Otros elementos del menú -->
+      </ul>
+    </div>
+    <!-- Contenido principal -->
+    <div class="main-content" id="mainContent">
+      <div class="page-header">
+        <h1>Blue Dragon Motors</h1>
+      </div>
+      <!-- Contenido principal del dashboard -->
+      <p>Poderosa herramienta de administración...</p>
+    </div>
+  </div>
+  <!-- Footer -->
+  <footer>
+    <p>© 2024 NicolasDuplat. Todos los derechos reservados.</p>
+  </footer>
+</body>
+</html>

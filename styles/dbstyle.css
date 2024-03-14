@@ -1,0 +1,85 @@
+/* Estilos CSS para el dashboard */
+body {
+    font-family: "Arial", sans-serif;
+    background-color: #f0f0f0;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .wrapper {
+    display: flex;
+  }
+  
+  .sidebar {
+    background-color: dodgerblue;
+    color: #fff;
+    width: 250px;
+    height: 100vh;
+  }
+  
+  .sidebar-header {
+    padding: 15px;
+  }
+  
+  .sidebar-header h3 {
+    font-size: 24px;
+    font-weight: bold;
+  }
+  
+  .menu {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .menu li {
+    padding: 25px;
+  }
+  
+  .menu li a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: bold;
+  }
+  
+  .menu li a:hover {
+    background-color: #f65904;
+  }
+  
+  .main-content {
+    flex: 1;
+    padding: 50px;
+  }
+  
+  .page-header {
+    color: royalblue;
+  }
+  
+  footer {
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    padding: 10px 0;
+  }
+  
+  .star {
+    position: relative;
+    display: block;
+    width: 0;
+    height: 0;
+    border-right: 100px solid transparent;
+    border-left: 100px solid transparent;
+    border-bottom: 160px solid dodgerblue; /* Color dodgerblue */
+  }
+  
+  .star:after {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 56px; /* Mover hacia arriba para superponerlo sobre el triángulo anterior */
+    right: -100px;    
+    border-right: 100px solid transparent;
+    border-left: 100px solid transparent;
+    border-top: 160px solid dodgerblue; /* Color dodgerblue */
+  }
+  
